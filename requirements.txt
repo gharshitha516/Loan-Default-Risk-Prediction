@@ -1,8 +1,9 @@
 streamlit
-transformers
-torch
-sentencepiece
-safetensors
-evaluate
-datasets
 pandas
+numpy
+xgboost
+joblib
+shap
+matplotlib
+scikit-learn
+seaborn
