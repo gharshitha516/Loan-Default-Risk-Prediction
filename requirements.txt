@@ -1,0 +1,8 @@
+streamlit
+transformers
+torch
+sentencepiece
+safetensors
+evaluate
+datasets
+pandas
