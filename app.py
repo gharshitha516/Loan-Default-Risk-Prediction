@@ -1,3 +1,6 @@
+# ----------------------------------------------------------
+# 💰 Loan Default Risk Predictor (Fixed SHAP Warning Version)
+# ----------------------------------------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,13 +11,18 @@ import matplotlib.pyplot as plt
 import warnings
 
 # --------------------------------------------
-# 💾 Load model and scaler
+# ⚙️ Suppress Warnings (Optional)
+# --------------------------------------------
+warnings.filterwarnings("ignore")
+
+# --------------------------------------------
+# 💾 Load Model and Scaler
 # --------------------------------------------
 model = joblib.load("loan_default_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
 # --------------------------------------------
-# 🧭 Page setup
+# 🧭 Page Setup
 # --------------------------------------------
 st.set_page_config(page_title="Loan Default Risk Predictor", page_icon="💰", layout="centered")
 st.title("💰 Loan Default Risk Predictor")
@@ -41,7 +49,7 @@ loan_term = st.sidebar.slider("Loan Term (months)", 6, 84, 36)
 dti_ratio = st.sidebar.slider("Debt-to-Income Ratio", 0.0, 2.0, 0.4)
 
 # --------------------------------------------
-# 🧮 Feature Engineering (same as training)
+# 🧮 Feature Engineering (Same as Training)
 # --------------------------------------------
 debt_to_income = loan_amount / (income + 1e-6)
 credit_utilization = loan_amount / (credit_score + 1e-6)
@@ -78,14 +86,24 @@ else:
     st.error("🔴 High Risk — Borrower is likely to default!")
 
 # --------------------------------------------
-# 📊 Explainability with SHAP
+# 📊 Explainability with SHAP (Fixed)
 # --------------------------------------------
 with st.expander("📊 Explain Model Prediction (SHAP)", expanded=False):
-    warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+    st.markdown("### Feature Impact on Prediction")
 
+    # Initialize SHAP Explainer and compute values
     explainer = shap.Explainer(model)
     shap_values = explainer(scaled_input)
 
-    st.markdown("### Feature Impact on Prediction")
-    shap.plots.bar(shap_values)
-    st.pyplot(bbox_inches='tight')
+    # ✅ Fix: Explicit figure to avoid Streamlit warning
+    fig, ax = plt.subplots()
+    shap.plots.bar(shap_values, show=False)
+    st.pyplot(fig, bbox_inches='tight')
+    plt.close(fig)
+
+    # Optional: Show detailed summary plot (dot plot)
+    st.markdown("### Detailed SHAP Summary")
+    fig2, ax2 = plt.subplots()
+    shap.summary_plot(shap_values, input_df, show=False)
+    st.pyplot(fig2, bbox_inches='tight')
+    plt.close(fig2)
